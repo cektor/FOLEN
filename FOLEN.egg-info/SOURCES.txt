@@ -1,0 +1,9 @@
+LICENSE.txt
+folen.desktop
+setup.py
+FOLEN.egg-info/PKG-INFO
+FOLEN.egg-info/SOURCES.txt
+FOLEN.egg-info/dependency_links.txt
+FOLEN.egg-info/entry_points.txt
+FOLEN.egg-info/requires.txt
+FOLEN.egg-info/top_level.txt

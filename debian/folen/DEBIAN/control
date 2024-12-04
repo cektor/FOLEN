@@ -1,0 +1,10 @@
+Package: folen
+Version: 1.0-1
+Architecture: all
+Maintainer: Fatih Önder <fatih@algyazilim.com>
+Installed-Size: 57
+Depends: python3-cryptography, python3-pyqt5
+Section: utils
+Priority: optional
+Homepage: http://www.algyazilim.com
+Description: FOLEN, kullanıcıların dosya ve klasörlerini AES şifreleme algoritması ile güvenli bir şekilde şifrelemelerini ve şifreli dosyaları çözmelerini sağlayan bir masaüstü uygulamasıdır. Parola tabanlı şifreleme ve çözme desteği sunan bu uygulama, hassas verilerin korunmasını ve yalnızca doğru şifreyle erişilmesini garanti eder. FOLEN, kullanıcı dostu arayüzü ile kolayca kullanılabilir ve veri güvenliği sağlayan güçlü bir araçtır.

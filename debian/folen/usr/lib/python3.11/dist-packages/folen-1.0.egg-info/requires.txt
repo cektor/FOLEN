@@ -1,0 +1,6 @@
+numpy
+pillow
+pycryptodome
+pyqt5
+requests
+setuptools

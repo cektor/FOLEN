@@ -1,0 +1,11 @@
+[Desktop Entry]
+Version=1.0
+Name=FOLEN
+Comment=Secure Folder Encryption
+Exec=python3 /usr/bin/folen.py
+Icon=/usr/share/icons/hicolor/48x48/apps/folenlo.png
+Terminal=false
+Type=Application
+Categories=Utility
+
+Name[tr_TR]=FOLEN
