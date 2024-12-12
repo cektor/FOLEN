@@ -3,7 +3,7 @@
 </a>
 
 # FOLEN  
-It is a desktop application that allows users to securely encrypt their Folders and Contents with the AES encryption algorithm and decrypt encrypted files. Supporting password-based encryption and decryption, this application guarantees that sensitive data is protected and only accessed with the correct password. FOLEN is a powerful tool that is easy to use with a user-friendly interface and provides data security. Can run on Windows-Linux-MacOS
+It is a desktop application that allows users to securely encrypt their Folders and Contents with the AES encryption algorithm and decrypt encrypted files. Supporting password-based encryption and decryption, this application guarantees that sensitive data is protected and only accessed with the correct password. FOLEN is a powerful tool that is easy to use with a user-friendly interface and provides data security. Can run on Windows-Linux-MacOS.
 
 <h1 align="center">FOLEN Logo</h1>
 
