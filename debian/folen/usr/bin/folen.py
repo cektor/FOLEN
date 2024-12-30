@@ -48,8 +48,8 @@ class FolderEncryptorApp(QWidget):
         self.setup_language()
 
     def initUI(self):
-        self.setWindowTitle('FOLEN | Folder Encryptation')
-        self.setFixedSize(350, 450)
+        self.setWindowTitle('FOLEN')
+        self.setFixedSize(300, 450)
 
         palette = QPalette()
         palette.setColor(QPalette.Window, QColor(53, 53, 53))
@@ -62,13 +62,11 @@ class FolderEncryptorApp(QWidget):
         palette.setColor(QPalette.Button, QColor(53, 53, 53))
         palette.setColor(QPalette.ButtonText, QColor(255, 255, 255))
         self.setPalette(palette)
-        
-        layout = QVBoxLayout()
 
+        # Önce tüm widget'ları oluştur
         self.language_combo = QComboBox()
         self.language_combo.addItems(['Türkçe', 'English'])
         self.language_combo.currentIndexChanged.connect(self.change_language)
-
         self.language_combo.setStyleSheet("""
             QComboBox {
                 background-color: #353535;
@@ -86,27 +84,15 @@ class FolderEncryptorApp(QWidget):
                 color: white;
             }
         """)
-        layout.addWidget(self.language_combo)
-
-   
-        if LOGO_PATH:
-            self.logo_label = QLabel(self)  # Logo için QLabel oluştur
-            pixmap = QPixmap(LOGO_PATH)
-            scaled_pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
-            self.logo_label.setPixmap(scaled_pixmap)  # Logo resmini set et
-            self.logo_label.setAlignment(Qt.AlignCenter)
-            layout.addWidget(self.logo_label)  # Logo'yu layout'a ekle
 
         self.label = QLabel('Lütfen bir klasör veya FOLEN dosyası seçmek için tıklayın veya sürükleyip bırakın.')
         self.label.setAlignment(Qt.AlignCenter)
         self.label.setWordWrap(True)
-        layout.addWidget(self.label)
 
         self.password_input = QLineEdit()
         self.password_input.setEchoMode(QLineEdit.Password)
         self.password_input.setPlaceholderText('Parola (4-32 karakter)')
         self.password_input.setVisible(False)
-
         self.password_input.setStyleSheet("""
             QLineEdit {
                 background-color: #353535;
@@ -121,18 +107,13 @@ class FolderEncryptorApp(QWidget):
             }
         """)
 
-        layout.addWidget(self.password_input)
-
-
         self.checkbox = QCheckBox("İçeriği şifrele")
         self.checkbox.setVisible(False)
-        layout.addWidget(self.checkbox)
 
         self.action_button = QPushButton('Şifrele veya Çöz')
         self.action_button.setEnabled(False)
         self.action_button.setVisible(False)
         self.action_button.clicked.connect(self.process_file_or_folder)
-
         self.action_button.setStyleSheet("""
             QPushButton {
                 background-color: #353535;
@@ -151,12 +132,9 @@ class FolderEncryptorApp(QWidget):
             }
         """)
 
-        layout.addWidget(self.action_button)
-
         self.button_about = QPushButton("...↓...", self)
         self.button_about.setFont(QFont("Arial", 10))
         self.button_about.clicked.connect(self.show_about)
-
         self.button_about.setStyleSheet("""
             QPushButton {
                 background-color: #353535;
@@ -169,12 +147,59 @@ class FolderEncryptorApp(QWidget):
                 background-color: #454545;
             }
         """)
-        layout.addWidget(self.button_about)
-     
+        
+        # Layout'ları oluştur
+        layout = QVBoxLayout()
+        
+        # Üst kısım için layout
+        top_layout = QVBoxLayout()
+        top_layout.addWidget(self.language_combo)
+        
+        if LOGO_PATH:
+            self.logo_label = QLabel(self)
+            pixmap = QPixmap(LOGO_PATH)
+            scaled_pixmap = pixmap.scaled(100, 100, Qt.KeepAspectRatio, Qt.SmoothTransformation)
+            self.logo_label.setPixmap(scaled_pixmap)
+            self.logo_label.setAlignment(Qt.AlignCenter)
+            top_layout.addWidget(self.logo_label)
+        
+        top_layout.addWidget(self.label)
+        
+        # Alt kısım için ayrı bir widget ve layout oluştur
+        bottom_widget = QWidget()
+        bottom_layout = QVBoxLayout(bottom_widget)
+        bottom_layout.setContentsMargins(10, 10, 10, 10)
+        
+        # Seçim ve işlem widgetları
+        selection_layout = QVBoxLayout()
+        selection_layout.addWidget(self.password_input)
+        selection_layout.addWidget(self.checkbox)
+        selection_layout.addWidget(self.action_button)
+        
+        bottom_layout.addLayout(selection_layout)
+        
+        # Alt bilgi ve about butonu
+        info_label = QLabel("ALG Yazılım Inc.© | www.algyazilim.com")
+        info_label.setAlignment(Qt.AlignCenter)
+        info_label.setStyleSheet("""
+            QLabel {
+                color: #666666;
+                font-size: 10px;
+            }
+        """)
+        
+        bottom_layout.addWidget(info_label)
+        bottom_layout.addWidget(self.button_about)
+        
+        # Ana layout'a ekle
+        layout.addLayout(top_layout)
+        layout.addStretch(1)  # Esnek boşluk ekle
+        layout.addWidget(bottom_widget)
+        
         self.setLayout(layout)
         self.selected_path = None
         self.setAcceptDrops(True)
-
+        
         stored_language = self.settings.value('language', 'Türkçe')
         self.language_combo.setCurrentText(stored_language)
 
@@ -203,17 +228,48 @@ class FolderEncryptorApp(QWidget):
 
     def translate_ui(self, language):
         if language == 'English':
-            self.setWindowTitle('FOLEN | Folder Encryption')
+            # Ana pencere
+            self.setWindowTitle('FOLEN')
             self.label.setText('Please click or drag and drop a folder or FOLEN file.')
             self.password_input.setPlaceholderText('Password (4-32 characters)')
             self.checkbox.setText('Encrypt content')
             self.action_button.setText('Encrypt or Decrypt')
+            
+            # Hata mesajları
+            self.password_error = 'Password must be between 4 and 32 characters.'
+            self.invalid_selection = 'Please select a folder or FOLEN file.'
+            self.error_title = 'Error'
+            self.success_title = 'Success'
+            self.error_prefix = 'An error occurred: '
+            
+            # Başarı mesajları
+            self.encrypt_success = 'Folder "{}" has been successfully encrypted.'
+            self.decrypt_success = 'Folder "{}" has been successfully decrypted.'
+            
+            # Seçim metni
+            self.selected_text = 'Selected: {}'
+            
         else:  # Türkçe
-            self.setWindowTitle('FOLEN | Folder Encryption')
+            # Ana pencere
+            self.setWindowTitle('FOLEN')
             self.label.setText('Lütfen bir klasör veya FOLEN dosyası seçmek için tıklayın veya sürükleyip bırakın.')
             self.password_input.setPlaceholderText('Parola (4-32 karakter)')
             self.checkbox.setText('İçeriği şifrele')
             self.action_button.setText('Şifrele veya Çöz')
+            
+            # Hata mesajları
+            self.password_error = 'Parola 4 ile 32 karakter arasında olmalıdır.'
+            self.invalid_selection = 'Lütfen bir klasör veya .folen dosyası seçin.'
+            self.error_title = 'Hata'
+            self.success_title = 'Başarılı'
+            self.error_prefix = 'Bir hata oluştu: '
+            
+            # Başarı mesajları
+            self.encrypt_success = '"{}" klasörü başarıyla şifrelendi.'
+            self.decrypt_success = '"{}" klasörü başarıyla çözüldü.'
+            
+            # Seçim metni
+            self.selected_text = 'Seçilen: {}'
 
     def dragEnterEvent(self, event):
         if event.mimeData().hasUrls():
@@ -229,22 +285,18 @@ class FolderEncryptorApp(QWidget):
             self.update_ui_for_selection()
 
     def get_password(self):
-        language = self.language_combo.currentText()
         password = self.password_input.text()
         if len(password) < 4 or len(password) > 32:
-            message = 'Parola 4 ile 32 karakter arasında olmalıdır.' if language == 'Türkçe' else 'Password must be between 4 and 32 characters.'
-            QMessageBox.warning(self, 'Hata' if language == 'Türkçe' else 'Error', message)
+            self.show_message(self.error_title, self.password_error)
             return None
 
-        # SHA256 ile hash'leme
         digest = hashes.Hash(hashes.SHA256(), backend=default_backend())
         digest.update(password.encode())
-        return digest.finalize()  # AES için 32-byte anahtar döndürür
-
+        return digest.finalize()
 
     def process_file_or_folder(self):
         if not self.selected_path:
-            QMessageBox.warning(self, "Error", "No file or folder selected!")
+            self.show_message("Hata", "Dosya veya klasör seçilmedi!", QMessageBox.Warning)
             return
 
         key = self.get_password()
@@ -267,9 +319,31 @@ class FolderEncryptorApp(QWidget):
                     for file in files:
                         file_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_path, folder_path)
-                        zipf.write(file_path, arcname)
+                        
+                        # İçeriği şifreleme seçili ise dosyaları şifrele
+                        if self.checkbox.isChecked():
+                            with open(file_path, 'rb') as f:
+                                data = f.read()
+                            
+                            # Her dosya için yeni bir IV oluştur
+                            file_iv = os.urandom(16)
+                            cipher = Cipher(algorithms.AES(key), modes.CFB(file_iv), backend=default_backend())
+                            encryptor = cipher.encryptor()
+                            encrypted_data = file_iv + encryptor.update(data) + encryptor.finalize()
+                            
+                            # Geçici dosya oluştur ve şifrelenmiş veriyi yaz
+                            temp_file = file_path + '.temp'
+                            with open(temp_file, 'wb') as f:
+                                f.write(encrypted_data)
+                            
+                            # Geçici dosyayı ZIP'e ekle
+                            zipf.write(temp_file, arcname)
+                            os.remove(temp_file)
+                        else:
+                            # İçeriği şifreleme seçili değilse dosyayı olduğu gibi ekle
+                            zipf.write(file_path, arcname)
 
-            # Encrypt ZIP
+            # ZIP dosyasını şifrele
             with open(zip_file, 'rb') as f:
                 data = f.read()
 
@@ -285,9 +359,12 @@ class FolderEncryptorApp(QWidget):
             os.remove(zip_file)
             shutil.rmtree(folder_path)
 
-            QMessageBox.information(self, "Başarılı", "Başarıyla şifrelendi.")
+            # Klasör adını al
+            folder_name = os.path.basename(folder_path)
+            self.show_message(self.success_title, self.encrypt_success.format(folder_name))
+            
         except Exception as e:
-            QMessageBox.critical(self, "Hata", f"Bir hata oluştu: {str(e)}")
+            self.show_message(self.error_title, self.error_prefix + str(e))
 
     def decrypt_file(self, file_path, key):
         try:
@@ -308,63 +385,201 @@ class FolderEncryptorApp(QWidget):
 
             decrypted_folder = file_path.replace('.folen', '')
             with zipfile.ZipFile(zip_file, 'r') as zipf:
-                zipf.extractall(decrypted_folder)
+                for info in zipf.infolist():
+                    extracted_path = zipf.extract(info, decrypted_folder)
+                    
+                    # Dosya boyutu 16 byte'dan büyükse içeriği şifrelenmiş olabilir
+                    if os.path.getsize(extracted_path) > 16:
+                        try:
+                            with open(extracted_path, 'rb') as f:
+                                file_data = f.read()
+                            
+                            # İlk 16 byte IV olabilir, şifre çözmeyi dene
+                            file_iv = file_data[:16]
+                            file_encrypted_data = file_data[16:]
+                            
+                            cipher = Cipher(algorithms.AES(key), modes.CFB(file_iv), backend=backend)
+                            decryptor = cipher.decryptor()
+                            file_decrypted_data = decryptor.update(file_encrypted_data) + decryptor.finalize()
+                            
+                            # Başarılı ise dosyayı güncelle
+                            with open(extracted_path, 'wb') as f:
+                                f.write(file_decrypted_data)
+                        except:
+                            # Şifre çözme başarısız olursa dosya zaten şifreli değildir
+                            pass
 
-            os.remove(zip_file)
+            # Sadece dosyanın içeriği varsa silin
+            if os.path.getsize(zip_file) > 0:
+                os.remove(zip_file)
             os.remove(file_path)
 
-            QMessageBox.information(self, "Başarılı", "Başarıyla çözüldü.")
+            # Klasör adını al
+            folder_name = os.path.basename(file_path.replace('.folen', ''))
+            self.show_message(self.success_title, self.decrypt_success.format(folder_name))
+            
         except Exception as e:
-            QMessageBox.critical(self, "Hata", f"Bir hata oluştu: {str(e)}")
-            
-            
-            
+            self.show_message(self.error_title, self.error_prefix + str(e))
+
     def update_ui_for_selection(self):
         if not self.selected_path:
             return
 
-        language = self.language_combo.currentText()
-
         if os.path.isdir(self.selected_path):
-            # Folder selected
-            self.action_button.setText('Şifrele' if language == 'Türkçe' else 'Encrypt')
+            self.action_button.setText('Şifrele' if self.language_combo.currentText() == 'Türkçe' else 'Encrypt')
+            self.checkbox.setVisible(True)
         elif self.selected_path.endswith('.folen'):
-            # .folen file selected
-            self.action_button.setText('Çöz' if language == 'Türkçe' else 'Decrypt')
+            self.action_button.setText('Çöz' if self.language_combo.currentText() == 'Türkçe' else 'Decrypt')
+            self.checkbox.setVisible(False)
         else:
-            # Invalid selection
-            message = 'Lütfen bir klasör veya .folen dosyası seçin.' if language == 'Türkçe' else 'Please select a folder or .folen file.'
-            QMessageBox.warning(self, 'Hata' if language == 'Türkçe' else 'Error', message)
+            self.show_message(self.error_title, self.invalid_selection)
             self.selected_path = None
             self.action_button.setEnabled(False)
             return
 
         self.password_input.setVisible(True)
-        self.checkbox.setVisible(True)
         self.action_button.setVisible(True)
         self.action_button.setEnabled(True)
+        self.label.setText(self.selected_text.format(self.selected_path))
 
-        self.label.setText(f'Seçilen: {self.selected_path}' if language == 'Türkçe' else f'Selected: {self.selected_path}')
-        
-            
-            
     def show_about(self):
         """Hakkında penceresini gösterir."""
-        about_text = (
-        "FOLEN | FOLder ENcryption \n\n"
-        "Bu uygulama, kullanıcıların dosya ve klasörlerini güvenli bir şekilde şifrelemelerini ve şifreli dosyaları çözmelerini sağlayan kullanımı kolay bir masaüstü uygulamasıdır. AES (Advanced Encryption Standard) algoritmasını kullanarak yüksek güvenlikli şifreleme sağlar, böylece kullanıcı verilerini korur ve sadece doğru şifreyle erişilmesini garanti eder. Bu uygulama, özellikle hassas verilerini güvenli bir şekilde saklamak isteyen bireyler ve kurumlar için tasarlanmıştır.\n\n"
-        "Geliştirici: ALG Yazılım Inc.©\n"
-        "www.algyazilim.com | info@algyazilim.com\n\n"
-        "Fatih ÖNDER (CekToR) | fatih@algyazilim.com\n"
-        "GitHub: https://github.com/cektor\n\n"
-        "ALG Yazılım Pardus'a Göç'ü Destekler.\n\n"
-        "Sürüm: 1.0"
-        )
-        # Hakkında penceresini doğru şekilde göster
-        QMessageBox.information(self, "FOLEN Hakkında", about_text, QMessageBox.Ok)
+        msg_box = QMessageBox(self)
+        language = self.language_combo.currentText()
+        
+        # Başlık çevirisi
+        msg_box.setWindowTitle("FOLEN Hakkında" if language == 'Türkçe' else "About FOLEN")
+        
+        # QLabel'ı bul ve wordWrap özelliğini ayarla
+        for child in msg_box.children():
+            if isinstance(child, QLabel):
+                child.setWordWrap(True)
+        
+        # Dile göre içerik metni
+        if language == 'Türkçe':
+            about_text = (
+                "<div style='color: white; padding: 10px;'>"
+                "<h2 style='color: #4A90E2; text-align: center; margin: 10px 0; font-size: 18px;'>"
+                "FOLEN | FOLder ENcryption</h2>"
+                "<p style='margin: 15px 0; line-height: 1.4; font-size: 12px; text-align: justify;'>"
+                "Bu uygulama, kullanıcıların klasörlerini güvenli bir şekilde şifrelemelerini sağlar."
+                "</p>"
+                "<p style='text-align: center; color: #4A90E2; margin: 10px 0; font-size: 12px;'>"
+                "Geliştirici: ALG Yazılım Inc.©</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "www.algyazilim.com | info@algyazilim.com</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "Fatih ÖNDER (CekToR)</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "fatih@algyazilim.com</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "<a href='https://github.com/cektor' style='color: #4A90E2; text-decoration: none;'>"
+                "GitHub: github.com/cektor</a></p>"
+                "<p style='text-align: center; color: #4A90E2; margin: 10px 0; font-size: 12px;'>"
+                "ALG Yazılım Pardus'a Göç'ü Destekler.</p>"
+                "<p style='text-align: center; color: #666666; margin: 5px 0; font-size: 11px;'>"
+                "Sürüm: 1.0</p>"
+                "</div>"
+            )
+        else:  # English
+            about_text = (
+                "<div style='color: white; padding: 10px;'>"
+                "<h2 style='color: #4A90E2; text-align: center; margin: 10px 0; font-size: 18px;'>"
+                "FOLEN | FOLder ENcryption</h2>"
+                "<p style='margin: 15px 0; line-height: 1.4; font-size: 12px; text-align: justify;'>"
+                "This application allows users to securely encrypt their folders."
+                "</p>"
+                "<p style='text-align: center; color: #4A90E2; margin: 10px 0; font-size: 12px;'>"
+                "Developer: ALG Software Inc.©</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "www.algyazilim.com | info@algyazilim.com</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "Fatih ÖNDER (CekToR)</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "fatih@algyazilim.com</p>"
+                "<p style='text-align: center; margin: 5px 0; font-size: 12px;'>"
+                "<a href='https://github.com/cektor' style='color: #4A90E2; text-decoration: none;'>"
+                "GitHub: github.com/cektor</a></p>"
+                "<p style='text-align: center; color: #4A90E2; margin: 10px 0; font-size: 12px;'>"
+                "ALG Software Supports Migration to Pardus.</p>"
+                "<p style='text-align: center; color: #666666; margin: 5px 0; font-size: 11px;'>"
+                "Version: 1.0</p>"
+                "</div>"
+            )
+        
+        msg_box.setText(about_text)
+        
+        # MessageBox stilini ayarla
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #353535;
+            }
+            QMessageBox QLabel {
+                color: white;
+                min-width: 400px;
+                max-width: 400px;
+                background-color: #353535;
+                padding: 10px;
+            }
+            QPushButton {
+                background-color: #454545;
+                color: white;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 4px;
+                min-width: 60px;
+                margin: 3px;
+            }
+            QPushButton:hover {
+                background-color: #4A90E2;
+            }
+        """)
+        
+        msg_box.setFixedSize(300, 300)
+        msg_box.exec_()
+
+    # Genel MessageBox'lar için yardımcı fonksiyon ekle
+    def show_message(self, title, message, icon=QMessageBox.Information):
+        msg_box = QMessageBox(self)
+        msg_box.setWindowTitle(title)
+        msg_box.setText(message)
+        msg_box.setIcon(icon)
+        
+        # MessageBox stilini ayarla
+        msg_box.setStyleSheet("""
+            QMessageBox {
+                background-color: #353535;
+            }
+            QMessageBox QLabel {
+                color: white;
+                background-color: #353535;
+            }
+            QPushButton {
+                background-color: #454545;
+                color: white;
+                border: none;
+                padding: 5px 15px;
+                border-radius: 4px;
+                min-width: 60px;
+            }
+            QPushButton:hover {
+                background-color: #4A90E2;
+            }
+        """)
+        
+        # QLabel'ı bul ve özelliklerini ayarla
+        for child in msg_box.children():
+            if isinstance(child, QLabel) and not child.pixmap():  # İkon hariç diğer label'lar
+                child.setWordWrap(True)
+                child.setAlignment(Qt.AlignLeft)
+                child.setStyleSheet("padding-left: 10px; font-size: 12px;")
+        
+        return msg_box.exec_()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
+    if ICON_PATH:
+        app.setWindowIcon(QIcon(ICON_PATH))
     window = FolderEncryptorApp()
     window.show()
     sys.exit(app.exec_())
