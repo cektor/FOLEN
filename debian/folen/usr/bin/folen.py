@@ -313,37 +313,15 @@ class FolderEncryptorApp(QWidget):
             zip_file = folder_path + '.zip'
             encrypted_file = folder_path + '.folen'
 
-            # Create ZIP
+            # Create ZIP without content encryption
             with zipfile.ZipFile(zip_file, 'w', zipfile.ZIP_DEFLATED) as zipf:
                 for root, _, files in os.walk(folder_path):
                     for file in files:
                         file_path = os.path.join(root, file)
                         arcname = os.path.relpath(file_path, folder_path)
-                        
-                        # İçeriği şifreleme seçili ise dosyaları şifrele
-                        if self.checkbox.isChecked():
-                            with open(file_path, 'rb') as f:
-                                data = f.read()
-                            
-                            # Her dosya için yeni bir IV oluştur
-                            file_iv = os.urandom(16)
-                            cipher = Cipher(algorithms.AES(key), modes.CFB(file_iv), backend=default_backend())
-                            encryptor = cipher.encryptor()
-                            encrypted_data = file_iv + encryptor.update(data) + encryptor.finalize()
-                            
-                            # Geçici dosya oluştur ve şifrelenmiş veriyi yaz
-                            temp_file = file_path + '.temp'
-                            with open(temp_file, 'wb') as f:
-                                f.write(encrypted_data)
-                            
-                            # Geçici dosyayı ZIP'e ekle
-                            zipf.write(temp_file, arcname)
-                            os.remove(temp_file)
-                        else:
-                            # İçeriği şifreleme seçili değilse dosyayı olduğu gibi ekle
-                            zipf.write(file_path, arcname)
+                        zipf.write(file_path, arcname)
 
-            # ZIP dosyasını şifrele
+            # Encrypt ZIP file
             with open(zip_file, 'rb') as f:
                 data = f.read()
 
@@ -385,32 +363,10 @@ class FolderEncryptorApp(QWidget):
 
             decrypted_folder = file_path.replace('.folen', '')
             with zipfile.ZipFile(zip_file, 'r') as zipf:
-                for info in zipf.infolist():
-                    extracted_path = zipf.extract(info, decrypted_folder)
-                    
-                    # Dosya boyutu 16 byte'dan büyükse içeriği şifrelenmiş olabilir
-                    if os.path.getsize(extracted_path) > 16:
-                        try:
-                            with open(extracted_path, 'rb') as f:
-                                file_data = f.read()
-                            
-                            # İlk 16 byte IV olabilir, şifre çözmeyi dene
-                            file_iv = file_data[:16]
-                            file_encrypted_data = file_data[16:]
-                            
-                            cipher = Cipher(algorithms.AES(key), modes.CFB(file_iv), backend=backend)
-                            decryptor = cipher.decryptor()
-                            file_decrypted_data = decryptor.update(file_encrypted_data) + decryptor.finalize()
-                            
-                            # Başarılı ise dosyayı güncelle
-                            with open(extracted_path, 'wb') as f:
-                                f.write(file_decrypted_data)
-                        except:
-                            # Şifre çözme başarısız olursa dosya zaten şifreli değildir
-                            pass
+                zipf.extractall(decrypted_folder)
 
-            # Sadece dosyanın içeriği varsa silin
-            if os.path.getsize(zip_file) > 0:
+            # Remove ZIP file if it exists
+            if os.path.exists(zip_file):
                 os.remove(zip_file)
             os.remove(file_path)
 
