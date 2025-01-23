@@ -216,6 +216,7 @@ class FolderEncryptorApp(QWidget):
         self.action_button.setText('Şifrele veya Çöz' if language == 'Türkçe' else 'Encrypt or Decrypt')
         self.action_button.setEnabled(False)
         self.label.setText('Lütfen bir klasör veya FOLEN dosyası seçmek için tıklayın veya sürükleyip bırakın.' if language == 'Türkçe' else 'Please click or drag and drop a folder or FOLEN file.')
+
     def setup_language(self):
         current_language = self.language_combo.currentText()
         self.translate_ui(current_language)
@@ -259,7 +260,7 @@ class FolderEncryptorApp(QWidget):
             
             # Hata mesajları
             self.password_error = 'Parola 4 ile 32 karakter arasında olmalıdır.'
-            self.invalid_selection = 'Lütfen bir klasör veya .folen dosyası seçin.'
+            self.invalid_selection = 'Lütfen bir klasör veya FOLEN dosyası seçin.'
             self.error_title = 'Hata'
             self.success_title = 'Başarılı'
             self.error_prefix = 'Bir hata oluştu: '
@@ -296,7 +297,7 @@ class FolderEncryptorApp(QWidget):
 
     def process_file_or_folder(self):
         if not self.selected_path:
-            self.show_message("Hata", "Dosya veya klasör seçilmedi!", QMessageBox.Warning)
+            self.show_message(self.error_title, self.invalid_selection, QMessageBox.Warning)
             return
 
         key = self.get_password()
@@ -410,6 +411,7 @@ class FolderEncryptorApp(QWidget):
         for child in msg_box.children():
             if isinstance(child, QLabel):
                 child.setWordWrap(True)
+                child.setFixedSize(300, 300)
         
         # Dile göre içerik metni
         if language == 'Türkçe':
@@ -531,6 +533,22 @@ class FolderEncryptorApp(QWidget):
                 child.setStyleSheet("padding-left: 10px; font-size: 12px;")
         
         return msg_box.exec_()
+
+    def mousePressEvent(self, event):
+        self.open_file_dialog()
+
+    def open_file_dialog(self):
+        options = QFileDialog.Options()
+        options |= QFileDialog.ReadOnly
+        file_dialog = QFileDialog()
+        file_dialog.setOptions(options)
+        file_dialog.setFileMode(QFileDialog.ExistingFiles)
+        file_dialog.setViewMode(QFileDialog.Detail)
+        file_dialog.setDirectory(os.path.expanduser("~"))
+        file_dialog.setNameFilter("All Files (*);;FOLEN Files (*.folen)")
+        if file_dialog.exec_():
+            self.selected_path = file_dialog.selectedFiles()[0]
+            self.update_ui_for_selection()
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
